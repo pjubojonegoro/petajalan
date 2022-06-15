@@ -13,7 +13,7 @@
 	<!-- Mapbox GL -->
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css" rel='stylesheet' />
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js"></script>
-    <title>leaflet-geojson-vt demo</title>
+    <title>Peta Sebaran PJU Kab Bojonegoro</title>
 
     <style>
       body {
@@ -123,14 +123,6 @@
     opacity: 1,
     fillOpacity: 0.7,
 	};
-	
-	var geojsonStyleApp = {
-    fillColor:"#2cc1d1",
-    color: "#2cc1d1",
-    weight: 5,
-    opacity: 1,
-    fillOpacity: 1,
-	};
 
 	var options = {
     maxZoom: 20,
@@ -139,20 +131,15 @@
     style: geojsonStyle
 	};
 	
-	var optionsapp = {
-    maxZoom: 20,
-    tolerance: 3,
-    debug: 0,
-    style: geojsonStyleApp
-	};
+	
 	var lampukab = L.geoJson.vt(lampujalankab, options).addTo(map);
 	var lampukota = L.geoJson.vt(lampujalankota, options).addTo(map);
-	
+	var kwh = L.geoJson.vt(kwh, options).addTo(map);
 	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	
 	//////////////////////// LOKASI ////////////////////////////////
 		function onLocationFound(e) {
-		var radius = e.accuracy/5;
+		var radius = e.accuracy;
 
 		var locationMarker = L.marker(e.latlng).addTo(map)
 		var locationCircle = L.circle(e.latlng, radius).addTo(map);
@@ -185,14 +172,8 @@
 		style: 'mapbox://styles/mapbox/satellite-v9'})
 	}
 	];
-	
-	var overLayers = [
-	{
-		name: "APP",
-		layer: L.geoJson.vt(kwh, optionsapp)
-	}];
 
-	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
+	var panelLayers = new L.Control.PanelLayers(baseLayers);
 	map.addControl(panelLayers);
 </script>
   </body>
