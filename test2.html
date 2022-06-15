@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- leaflet css link  -->
+    <link rel="stylesheet" href="leaflet.css"/>
+	<link rel="stylesheet" href="leaflet-search.css" />
+	<link rel="stylesheet" href="leaflet-panel-layers.css" />
+	<!-- Mapbox GL -->
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css" rel='stylesheet' />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js"></script>
+    <title>leaflet-geojson-vt demo</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+
+<!-- leaflet js link  -->
+
+<script src="leaflet.js"></script>
+<script src="https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
+<!-- geojson vt  -->
+<script src="geojson-vt.js"></script>
+<script src="leaflet-geojson-vt.js"></script>
+
+<!-- js data link  -->
+<script src="data/lampujalankab.js"></script>
+<script src="data/lampujalankota.js"></script>
+<script src="data/ruaskab.js"></script>
+<script src="data/ruaskota.js"></script>
+<script src="data/kwh.js"></script>
+<script src="leaflet-search.js"></script>
+<script src="leaflet-panel-layers.js"></script>
+
+<script>
+	var map = L.map('map', {
+			zoom: 14,
+			center: new L.latLng(-7.162553317686097, 111.87944412231445),
+		}),
+		geojsonOpts = {
+			pointToLayer: function(feature, latlng) {
+				return L.marker(latlng, {
+					icon: L.divIcon({
+						className: feature.properties.wilayah,
+						iconSize: L.point(16, 16),
+						html: feature.properties.wilayah[0].toUpperCase(),
+					})
+				}).bindPopup(feature.properties.wilayah+'<br><b>'+feature.properties.ruas+'</b>');
+			}
+		};
+
+	var gldark = new L.mapboxGL({
+    accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
+    style: 'mapbox://styles/mapbox/dark-v10'
+	});
+	map.addLayer(gldark);
+	
+	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
+	var poiLayers = L.layerGroup([
+		L.geoJson(ruaskab, geojsonOpts),
+		L.geoJson(ruaskota, geojsonOpts)
+	])
+	.addTo(map);
+
+	L.control.search({
+		layer: poiLayers,
+		initial: false,
+		propertyName: 'ruas',
+		buildTip: function(text, val) {
+			var nomor = val.layer.feature.properties.nomor;
+			return '<a href="#" class="'+nomor+'">'+nomor+'.'+text+'</a>';
+		}
+	})
+	.addTo(map);  
+	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
+	
+	//////////////////////// RUAS JALAN ////////////////////////////////
+	function onEachFeature(feature, layer) {
+		if (feature.properties && feature.properties.wilayah) {
+		layer.bindPopup(feature.properties.nomor+'. '+feature.properties.ruas);
+		}
+		}
+
+	var ruasKab = L.geoJSON(ruaskab, {
+
+		filter: function (feature, layer) {
+			return true;
+		},
+
+		onEachFeature: onEachFeature
+	}).addTo(map);
+	
+	var ruasKota = L.geoJSON(ruaskota, {
+
+		filter: function (feature, layer) {
+			return true;
+		},
+
+		onEachFeature: onEachFeature
+	}).addTo(map);
+	//////////////////////// RUAS JALAN ////////////////////////////////
+	
+	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
+	var geojsonStyle = {
+    fillColor:"#fab802",
+    color: "#fab802",
+    weight: 5,
+    opacity: 1,
+    fillOpacity: 0.7,
+	};
+	
+	var geojsonStyleApp = {
+    fillColor:"#2cc1d1",
+    color: "#2cc1d1",
+    weight: 5,
+    opacity: 1,
+    fillOpacity: 1,
+	};
+
+	var options = {
+    maxZoom: 20,
+    tolerance: 3,
+    debug: 0,
+    style: geojsonStyle
+	};
+	
+	var optionsapp = {
+    maxZoom: 20,
+    tolerance: 3,
+    debug: 0,
+    style: geojsonStyleApp
+	};
+	var lampukab = L.geoJson.vt(lampujalankab, options).addTo(map);
+	var lampukota = L.geoJson.vt(lampujalankota, options).addTo(map);
+	
+	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
+	
+	//////////////////////// LOKASI ////////////////////////////////
+		function onLocationFound(e) {
+		var radius = e.accuracy/5;
+
+		var locationMarker = L.marker(e.latlng).addTo(map)
+		var locationCircle = L.circle(e.latlng, radius).addTo(map);
+	}
+
+	function onLocationError(e) {
+		alert(e.message);
+	}
+
+	map.on('locationfound', onLocationFound);
+	map.on('locationerror', onLocationError);
+
+	map.locate({setView: true, maxZoom: 16});
+	//////////////////////// LOKASI ////////////////////////////////
+	
+	////////////////////////////////////////////////////////////////
+	var baseLayers = [
+	{
+		name: "Dark",
+		layer: gldark
+	},
+	{
+		name: "Light",
+		layer: L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
+		style: 'mapbox://styles/mapbox/light-v10'})
+	},
+	{
+		name: "Satellite",
+		layer: L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
+		style: 'mapbox://styles/mapbox/satellite-v9'})
+	}
+	];
+	
+	var overLayers = [
+	{
+		name: "APP",
+		layer: L.geoJson.vt(kwh, optionsapp)
+	}];
+
+	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
+	map.addControl(panelLayers);
+</script>
+  </body>
+</html>
