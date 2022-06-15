@@ -39,12 +39,12 @@
 <script src="leaflet-geojson-vt.js"></script>
 
 <!-- js data link  -->
-<script src="lampujalankab.js"></script>
-<script src="lampujalankota.js"></script>
-<script src="titiklampurencanaapbd2021.js"></script>
-<script src="ruaskab.js"></script>
-<script src="ruaskota.js"></script>
-<script src="kwh.js"></script>
+<script src="data/lampujalankab.js"></script>
+<script src="data/lampujalankota.js"></script>
+<script src="data/titiklampurencanaapbd2021.js"></script>
+<script src="data/ruaskab.js"></script>
+<script src="data/ruaskota.js"></script>
+<script src="data/kwh.js"></script>
 <script src="leaflet-search.js"></script>
 <script src="leaflet-panel-layers.js"></script>
 
@@ -135,7 +135,7 @@
 	
 	var geojsonStyle2 = {
     fillColor:"#fc2d1e",
-    color: "#fafa02",
+    color: "#fc2d1e",
     weight: 5,
     opacity: 1,
     fillOpacity: 0.7,
@@ -159,7 +159,7 @@
     maxZoom: 20,
     tolerance: 3,
     debug: 0,
-    style: geojsonStyleApp
+    style: geojsonStyleApp};
 	
 	var lampukab = L.geoJson.vt(lampujalankab, options).addTo(map);
 	var lampukota = L.geoJson.vt(lampujalankota, options).addTo(map);
