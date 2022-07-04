@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- leaflet css link  -->
-    <link rel="stylesheet" href="leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"/>
 	<link rel="stylesheet" href="leaflet-search.css" />
 	<link rel="stylesheet" href="leaflet-panel-layers.css" />
 	<!-- Mapbox GL -->
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css" rel='stylesheet' />
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/rbush@3.0.1/rbush.js"></script>
+
     <title>Peta Sebaran PJU Kab Bojonegoro</title>
 
     <style>
@@ -32,21 +33,19 @@
 
 <!-- leaflet js link  -->
 
-<script src="leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
 <script src="https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
-<!-- geojson vt  -->
-<script src="geojson-vt.js"></script>
-<script src="leaflet-geojson-vt.js"></script>
-
+    <script src="leaflet-markers-canvas.js"></script>
 <!-- js data link  -->
-<script src="lampujalankab.js"></script>
-<script src="lampujalankota.js"></script>
-<script src="titiklampurencanaapbd2021.js"></script>
-<script src="ruaskab.js"></script>
-<script src="ruaskota.js"></script>
-<script src="kwh.js"></script>
+<script src="data/lampujalankab.js"></script>
+<script src="data/lampujalankota.js"></script>
+<script src="data/titiklampurencanaapbd2021.js"></script>
+<script src="data/ruaskab.js"></script>
+<script src="data/ruaskota.js"></script>
+<script src="data/kwh.js"></script>
 <script src="leaflet-search.js"></script>
 <script src="leaflet-panel-layers.js"></script>
+<script src="titikbaru.js"></script>
 
 <script>
 	var map = L.map('map', {
@@ -67,9 +66,41 @@
 
 	var gldark = new L.mapboxGL({
     accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
-    style: 'mapbox://styles/mapbox/dark-v10'
+    style: 'mapbox://styles/mapbox/dark-v10',
+	preferCanvas: true
 	});
 	map.addLayer(gldark);
+	      var markersCanvas = new L.MarkersCanvas();
+
+      markersCanvas.addTo(map);
+	  //////////////////////// TITIK LAMPU PJU ////////////////////////////////
+	var icon = L.icon({
+        iconUrl: "lampu.png",
+        iconSize: [8, 8],
+        iconAnchor: [0, 0],
+      });
+	  var merah = L.icon({
+        iconUrl: "baru.png",
+        iconSize: [8, 8],
+        iconAnchor: [0, 0],
+      });
+	  
+	 var markers = [];
+	 
+      for (var i = 0; i < lampujalan.length; i++) {
+  marker = new L.marker([lampujalan[i][1], lampujalan[i][2]], {icon})
+    .bindPopup(lampujalan[i][0])
+	markers.push(marker);
+	}
+
+
+	  
+	 for (var i = 0; i < rencana2021.length; i++) {
+  markerbaru = new L.marker([rencana2021[i][1], rencana2021[i][0]], {icon: merah})
+    .addTo(map);
+}
+      markersCanvas.addMarkers(markers);
+	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	
 	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
 	var poiLayers = L.layerGroup([
@@ -91,6 +122,9 @@
 	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
 	
 	//////////////////////// RUAS JALAN ////////////////////////////////
+	var myStyle = {
+    "weight": 4,
+	};
 	function onEachFeature(feature, layer) {
 		if (feature.properties && feature.properties.wilayah) {
 		layer.bindPopup(feature.properties.nomor+'. '+feature.properties.ruas);
@@ -98,7 +132,7 @@
 		}
 
 	var ruasKab = L.geoJSON(ruaskab, {
-
+		style: myStyle,
 		filter: function (feature, layer) {
 			return true;
 		},
@@ -107,7 +141,7 @@
 	}).addTo(map);
 	
 	var ruasKota = L.geoJSON(ruaskota, {
-
+		style: myStyle,
 		filter: function (feature, layer) {
 			return true;
 		},
@@ -116,55 +150,6 @@
 	}).addTo(map);
 	//////////////////////// RUAS JALAN ////////////////////////////////
 	
-	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
-	var geojsonStyle = {
-    fillColor:"#fab802",
-    color: "#fab802",
-    weight: 5,
-    opacity: 1,
-    fillOpacity: 0.7,
-	};
-	
-	var geojsonStyleApp = {
-    fillColor:"#2cc1d1",
-    color: "#2cc1d1",
-    weight: 5,
-    opacity: 1,
-    fillOpacity: 1,
-	};
-	
-	var geojsonStyle2 = {
-    fillColor:"#fc2d1e",
-    color: "#fc2d1e",
-    weight: 5,
-    opacity: 1,
-    fillOpacity: 0.7,
-	};
-
-	var options = {
-    maxZoom: 20,
-    tolerance: 3,
-    debug: 0,
-    style: geojsonStyle
-	};
-	
-	var options2 = {
-    maxZoom: 20,
-    tolerance: 3,
-    debug: 0,
-    style: geojsonStyle2
-	};
-	
-	var optionsapp = {
-    maxZoom: 20,
-    tolerance: 3,
-    debug: 0,
-    style: geojsonStyleApp};
-	
-	var lampukab = L.geoJson.vt(lampujalankab, options).addTo(map);
-	var lampukota = L.geoJson.vt(lampujalankota, options).addTo(map);
-	var rencana2021 = L.geoJson.vt(rencana2021, options2).addTo(map);
-	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	
 	//////////////////////// LOKASI ////////////////////////////////
 		function onLocationFound(e) {
@@ -192,8 +177,7 @@
 	},
 	{
 		name: "Light",
-		layer: L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
-		style: 'mapbox://styles/mapbox/light-v10'})
+		layer: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 	},
 	{
 		name: "Satellite",
@@ -205,11 +189,19 @@
 	var overLayers = [
 	{
 		name: "APP",
-		layer: L.geoJson.vt(kwh, optionsapp)
+		layer: L.geoJSON(kwh)
 	}];
 
 	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
 	map.addControl(panelLayers);
+	
+	function onLocationFound(e) {
+  var radius = e.accuracy;
+  L.marker(e.latlng).addTo(map)
+}
+
+map.on('locationfound', onLocationFound);
+map.locate({setView: true, watch: true, maxZoom: 14});
 </script>
   </body>
 </html>
