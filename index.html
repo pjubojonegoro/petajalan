@@ -74,6 +74,18 @@
 	      var markersCanvas = new L.MarkersCanvas();
 
       markersCanvas.addTo(map);
+	
+	navigator.geolocation.getCurrentPosition(position => {
+	console.log(position);
+  const { coords: { latitude, longitude }} = position;
+  var marker = new L.marker([latitude, longitude], {
+    draggable: true,
+    autoPan: true
+  }).addTo(map);
+  map.setView([latitude, longitude], 13)
+
+  console.log(marker);
+})
 	  //////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	var icon = L.icon({
         iconUrl: "lampu.png",
