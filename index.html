@@ -232,13 +232,6 @@ var streetLabelsRenderer = new L.StreetLabels({
 	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
 	map.addControl(panelLayers);
 	
-	function onLocationFound(e) {
-  var radius = e.accuracy;
-  L.marker(e.latlng).addTo(map)
-}
-
-map.on('locationfound', onLocationFound);
-map.locate({watch: true, maxZoom: 14});
 </script>
   </body>
 </html>
