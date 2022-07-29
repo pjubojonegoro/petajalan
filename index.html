@@ -202,7 +202,11 @@
 	var overLayers = [
 	{
 		name: "APP",
-		layer: L.geoJSON(kwh)
+		layer: L.geoJSON(kwh,{
+  onEachFeature: function (feature, layer) {
+    layer.bindPopup(feature.properties.kwh);
+  }
+})
 	}];
 
 	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
