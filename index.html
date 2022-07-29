@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"/>
 	<link rel="stylesheet" href="leaflet-search.css" />
 	<link rel="stylesheet" href="leaflet-panel-layers.css" />
+	<link rel="stylesheet" href="leaflet-gps.css" />
 	<!-- Mapbox GL -->
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css" rel='stylesheet' />
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js"></script>
@@ -36,6 +37,8 @@
 
 <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
 <script src="https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
+<script src='https://rawcdn.githack.com/Viglino/Canvas-TextPath/9a757d745071e0eaf2440a1d02117dad38f5b6dd/ctxtextpath.js'></script>
+<script src='https://raw.githack.com/3mapslab/Leaflet.streetlabels/master/dist/Leaflet.streetlabels.js'></script>
     <script src="leaflet-markers-canvas.js"></script>
 <!-- js data link  -->
 <script src="data/lampujalankab.js"></script>
@@ -47,9 +50,27 @@
 <script src="leaflet-search.js"></script>
 <script src="leaflet-panel-layers.js"></script>
 <script src="titikbaru.js"></script>
+<script src="leaflet-gps.js"></script>
 
 <script>
+var streetLabelsRenderer = new L.StreetLabels({
+      collisionFlg : true,
+      propertyName : 'ruas',
+      showLabelIf: function(layer) {
+        return true; //layer.properties.type == "primary";
+      },
+      fontStyle: {
+        dynamicFontSize: true,
+        fontSize: 15,
+        fontSizeUnit: "px",
+        lineWidth: 4.0,
+        fillStyle: "black",
+        strokeStyle: "white",
+      },
+    })
+
 	var map = L.map('map', {
+			renderer: streetLabelsRenderer,
 			zoom: 14,
 			center: new L.latLng(-7.162553317686097, 111.87944412231445),
 		}),
@@ -75,17 +96,23 @@
 
       markersCanvas.addTo(map);
 	
-	navigator.geolocation.getCurrentPosition(position => {
-	console.log(position);
-  const { coords: { latitude, longitude }} = position;
-  var marker = new L.marker([latitude, longitude], {
-    draggable: true,
-    autoPan: true
-  }).addTo(map);
-  map.setView([latitude, longitude], 13)
+      //////////////////////// GPS ////////////////////////////////////////////
+	  var gps = new L.Control.Gps({
+		autoActive:true,
+		autoCenter:true
+	});//inizialize control
 
-  console.log(marker);
-})
+	gps
+	.on('gps:located', function(e) {
+		//	e.marker.bindPopup(e.latlng.toString()).openPopup()
+		console.log(e.latlng, map.getCenter())
+	})
+	.on('gps:disabled', function(e) {
+		e.marker.closePopup()
+	});
+
+	gps.addTo(map);
+	  /////////////////////// GPS /////////////////////////////////////////////
 	  //////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	var icon = L.icon({
         iconUrl: "lampu.png",
@@ -163,25 +190,6 @@
 	}).addTo(map);
 	//////////////////////// RUAS JALAN ////////////////////////////////
 	
-	
-	//////////////////////// LOKASI ////////////////////////////////
-		function onLocationFound(e) {
-		var radius = e.accuracy;
-
-		var locationMarker = L.marker(e.latlng).addTo(map)
-		var locationCircle = L.circle(e.latlng, radius).addTo(map);
-	}
-
-	function onLocationError(e) {
-		alert(e.message);
-	}
-
-	map.on('locationfound', onLocationFound);
-	map.on('locationerror', onLocationError);
-
-	map.locate({setView: true, maxZoom: 16});
-	//////////////////////// LOKASI ////////////////////////////////
-	
 	////////////////////////////////////////////////////////////////
 	var baseLayers = [
 	{
@@ -198,15 +206,27 @@
 		style: 'mapbox://styles/mapbox/satellite-v9'})
 	}
 	];
-
+	
+   var myIcon = L.Icon.extend({
+		iconUrl: 'kwh.png',
+		iconSize: [10, 10]});
+		
 	var overLayers = [
 	{
 		name: "APP",
 		layer: L.geoJSON(kwh,{
-  onEachFeature: function (feature, layer) {
-    layer.bindPopup(feature.properties.kwh);
-  }
-})
+            pointToLayer: function (feature, latLng) {
+          return new L.Marker(latLng, {
+            icon: new myIcon({
+              iconUrl: 'kwh.png',
+			  iconSize: [20, 20]
+            })
+          })
+      },
+           onEachFeature: function (feature, layer) {
+                   layer.bindPopup(feature.properties.kwh);
+           }
+  })
 	}];
 
 	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
