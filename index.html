@@ -93,8 +93,21 @@ var streetLabelsRenderer = new L.StreetLabels({
       markersCanvas.addTo(map);
 	
       //////////////////////// GPS ////////////////////////////////////////////
-	  
-	  /////////////////////// GPS /////////////////////////////////////////////
+	  var gps = new L.Control.Gps({
+		/////autoActive:true,
+		autoCenter:true
+	});//inizialize control
+
+	gps
+	.on('gps:located', function(e) {
+		//	e.marker.bindPopup(e.latlng.toString()).openPopup()
+		console.log(e.latlng, map.getCenter())
+	})
+	.on('gps:disabled', function(e) {
+		e.marker.closePopup()
+	});
+
+	gps.addTo(map);
 	  //////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	var icon = L.icon({
         iconUrl: "lampu.png",
@@ -134,10 +147,10 @@ var streetLabelsRenderer = new L.StreetLabels({
 		layer: poiLayers,
 		initial: false,
 		marker: false,
-		propertyName: 'ruas',
+		propertyName: 'NAMAJALAN',
 		buildTip: function(text, val) {
 			var nomor = val.layer.feature.properties.nomor;
-			return '<a href="#" class="'+nomor+'">'+nomor+'.'+text+'</a>';
+			return '<a href="#">.'+text+'</a>';
 		}
 	})
 	.addTo(map);  
