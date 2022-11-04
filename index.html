@@ -44,8 +44,7 @@
 <script src="data/lampujalankab.js"></script>
 <script src="data/lampujalankota.js"></script>
 <script src="data/titiklampurencanaapbd2021.js"></script>
-<script src="data/ruaskab.js"></script>
-<script src="data/ruaskota.js"></script>
+<script src="data/ruasjalankabbjn.js"></script>
 <script src="data/kwh.js"></script>
 <script src="leaflet-search.js"></script>
 <script src="leaflet-panel-layers.js"></script>
@@ -55,7 +54,7 @@
 <script>
 var streetLabelsRenderer = new L.StreetLabels({
       collisionFlg : true,
-      propertyName : 'ruas',
+      propertyName : 'NAMAJALAN',
       showLabelIf: function(layer) {
         return true; //layer.properties.type == "primary";
       },
@@ -63,7 +62,7 @@ var streetLabelsRenderer = new L.StreetLabels({
         dynamicFontSize: true,
         fontSize: 15,
         fontSizeUnit: "px",
-        lineWidth: 4.0,
+        lineWidth: 1.0,
         fillStyle: "black",
         strokeStyle: "white",
       },
@@ -76,13 +75,10 @@ var streetLabelsRenderer = new L.StreetLabels({
 		}),
 		geojsonOpts = {
 			pointToLayer: function(feature, latlng) {
-				return L.marker(latlng, {
-					icon: L.divIcon({
-						className: feature.properties.wilayah,
-						iconSize: L.point(16, 16),
-						html: feature.properties.wilayah[0].toUpperCase(),
-					})
-				}).bindPopup(feature.properties.wilayah+'<br><b>'+feature.properties.ruas+'</b>');
+				return {color: feature.properties.stroke };
+			},
+			onEachFeature: function(feature, marker) {
+				marker.bindPopup('<h4 style="color:'+feature.properties.stroke+'">'+ feature.properties.NAMAJALAN +'</h4>');
 			}
 		};
 
@@ -97,21 +93,7 @@ var streetLabelsRenderer = new L.StreetLabels({
       markersCanvas.addTo(map);
 	
       //////////////////////// GPS ////////////////////////////////////////////
-	  var gps = new L.Control.Gps({
-		/////autoActive:true,
-		autoCenter:true
-	});//inizialize control
-
-	gps
-	.on('gps:located', function(e) {
-		//	e.marker.bindPopup(e.latlng.toString()).openPopup()
-		console.log(e.latlng, map.getCenter())
-	})
-	.on('gps:disabled', function(e) {
-		e.marker.closePopup()
-	});
-
-	gps.addTo(map);
+	  
 	  /////////////////////// GPS /////////////////////////////////////////////
 	  //////////////////////// TITIK LAMPU PJU ////////////////////////////////
 	var icon = L.icon({
@@ -144,14 +126,14 @@ var streetLabelsRenderer = new L.StreetLabels({
 	
 	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
 	var poiLayers = L.layerGroup([
-		L.geoJson(ruaskab, geojsonOpts),
-		L.geoJson(ruaskota, geojsonOpts)
+		L.geoJson(ruasjalankabbjn, geojsonOpts)
 	])
 	.addTo(map);
 
 	L.control.search({
 		layer: poiLayers,
 		initial: false,
+		marker: false,
 		propertyName: 'ruas',
 		buildTip: function(text, val) {
 			var nomor = val.layer.feature.properties.nomor;
@@ -167,20 +149,11 @@ var streetLabelsRenderer = new L.StreetLabels({
 	};
 	function onEachFeature(feature, layer) {
 		if (feature.properties && feature.properties.wilayah) {
-		layer.bindPopup(feature.properties.nomor+'. '+feature.properties.ruas);
+		layer.bindPopup(feature.properties.LABELNO+'. '+feature.properties.NAMAJALAN);
 		}
 		}
 
-	var ruasKab = L.geoJSON(ruaskab, {
-		style: myStyle,
-		filter: function (feature, layer) {
-			return true;
-		},
-
-		onEachFeature: onEachFeature
-	}).addTo(map);
-	
-	var ruasKota = L.geoJSON(ruaskota, {
+	var ruasKab = L.geoJSON(ruasjalankabbjn, {
 		style: myStyle,
 		filter: function (feature, layer) {
 			return true;
@@ -231,7 +204,7 @@ var streetLabelsRenderer = new L.StreetLabels({
 
 	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
 	map.addControl(panelLayers);
-	
+
 </script>
   </body>
 </html>
