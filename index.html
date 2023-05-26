@@ -7,13 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- leaflet css link  -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 	<link rel="stylesheet" href="leaflet-search.css" />
 	<link rel="stylesheet" href="leaflet-panel-layers.css" />
 	<link rel="stylesheet" href="leaflet-gps.css" />
 	<!-- Mapbox GL -->
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css" rel='stylesheet' />
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel='stylesheet' />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
     <script src="https://unpkg.com/rbush@3.0.1/rbush.js"></script>
 
     <title>Peta Sebaran PJU Kab Bojonegoro</title>
@@ -27,6 +27,16 @@
         width: 100%;
         height: 100vh;
       }
+	  #mapid {width: 100%;height: 600px;border: thin dotted;}
+
+/* remove label background elements */
+.leaflet-tooltip.my-labels {
+  background-color: transparent;
+  border: transparent;
+  box-shadow: none;
+  font-weight: bold;
+  font-size: 12px;
+  }
     </style>
   </head>
   <body>
@@ -36,14 +46,17 @@
 <!-- leaflet js link  -->
 
 <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+<script src="leaflet.textpath.js"></script>
 <script src="https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
 <script src='https://rawcdn.githack.com/Viglino/Canvas-TextPath/9a757d745071e0eaf2440a1d02117dad38f5b6dd/ctxtextpath.js'></script>
 <script src='https://raw.githack.com/3mapslab/Leaflet.streetlabels/master/dist/Leaflet.streetlabels.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.6.1/randomColor.min.js" integrity="sha512-vPeZ7JCboHcfpqSx5ZD+/jpEhS4JpXxfz9orSvAPPj0EKUVShU2tgy7XkU+oujBJKnWmu4hU7r9MMQNWPfXsYw==" crossorigin="anonymous"></script>
     <script src="leaflet-markers-canvas.js"></script>
 <!-- js data link  -->
+<script src="data/batasdesa.js"></script>
 <script src="data/lampujalankab.js"></script>
 <script src="data/lampujalankota.js"></script>
-<script src="data/titiklampurencanaapbd2021.js"></script>
+<script src="data/tahun2022.js"></script>
 <script src="data/ruasjalankabbjn.js"></script>
 <script src="data/kwh.js"></script>
 <script src="leaflet-search.js"></script>
@@ -52,24 +65,9 @@
 <script src="leaflet-gps.js"></script>
 
 <script>
-var streetLabelsRenderer = new L.StreetLabels({
-      collisionFlg : true,
-      propertyName : 'NAMAJALAN',
-      showLabelIf: function(layer) {
-        return true; //layer.properties.type == "primary";
-      },
-      fontStyle: {
-        dynamicFontSize: true,
-        fontSize: 15,
-        fontSizeUnit: "px",
-        lineWidth: 1.0,
-        fillStyle: "black",
-        strokeStyle: "white",
-      },
-    })
+
 
 	var map = L.map('map', {
-			renderer: streetLabelsRenderer,
 			zoom: 14,
 			center: new L.latLng(-7.162553317686097, 111.87944412231445),
 		}),
@@ -81,17 +79,64 @@ var streetLabelsRenderer = new L.StreetLabels({
 				marker.bindPopup('<h4 style="color:'+feature.properties.stroke+'">'+ feature.properties.NAMAJALAN +'</h4>');
 			}
 		};
+		
 
-	var gldark = new L.mapboxGL({
-    accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
-    style: 'mapbox://styles/mapbox/dark-v10',
-	preferCanvas: true
-	});
-	map.addLayer(gldark);
-	      var markersCanvas = new L.MarkersCanvas();
+	  var markersCanvas = new L.MarkersCanvas();
 
       markersCanvas.addTo(map);
 	
+	  //////////////////////////////////////////////////////////////////////////
+	  L.Polygon.include({
+	_update: function () {
+		if (!this._map) { return; }
+
+		this._clipPoints();
+		this._simplifyPoints();
+		this._updatePath();
+		this.fire('reclipped', {parts: this._parts})
+	}
+});
+
+var layerbatasdesa = L.geoJSON(batasdesa, {
+	style: function (feature) {
+      return {
+        'color': randomColor()
+      }},
+	
+  onEachFeature: function (feature, layer) {
+		
+   // if (feature.geometry.type === "Polygon") {
+			
+			var bounds = layer.getBounds();
+            // Get center of bounds
+            var center = bounds.getCenter();
+      //var center = layer.getBounds().getCenter();
+			
+			layer.bindTooltip(feature.properties.NAME_4, {permanent: true, direction: "center", className: "my-labels"});
+			layer.on("click", function (e) {
+				 layer.bindPopup(feature.properties.NAME_4);
+			});
+
+     /* var marker =L.circleMarker(center, {color: '', radius:10,Title:20}).bindTooltip(feature.properties.name, {permanent: true, direction: "center", className: "my-labels"});
+			 map.addLayer(marker);*/
+     // var polygonAndItsCenter = L.layerGroup([layer, marker]);
+   // }
+  },
+});
+layerbatasdesa.addTo(map);
+var ruasjalanbjn = L.geoJson(ruasjalankabbjn, {
+        onEachFeature: function (feature, layer) {
+            layer.setText(feature.properties.NAMAJALAN, 
+			{
+			offset: -5, 
+			center:true,
+			attributes: {
+			'font-weight': 'bold',
+			'font-size': '15'
+			}
+			});
+        }
+    }).addTo(map);
       //////////////////////// GPS ////////////////////////////////////////////
 	  var gps = new L.Control.Gps({
 		/////autoActive:true,
@@ -130,9 +175,10 @@ var streetLabelsRenderer = new L.StreetLabels({
 
 
 	  
-	 for (var i = 0; i < rencana2021.length; i++) {
-  markerbaru = new L.marker([rencana2021[i][1], rencana2021[i][0]], {icon: merah})
-    .addTo(map);
+	 for (var i = 0; i < tahun2022.length; i++) {
+  marker2022 = new L.marker([tahun2022[i][1], tahun2022[i][2]], {icon})
+	.bindPopup(tahun2022[i][0])
+	markers.push(marker2022);
 }
       markersCanvas.addMarkers(markers);
 	//////////////////////// TITIK LAMPU PJU ////////////////////////////////
@@ -161,10 +207,11 @@ var streetLabelsRenderer = new L.StreetLabels({
     "weight": 4,
 	};
 	function onEachFeature(feature, layer) {
-		if (feature.properties && feature.properties.wilayah) {
-		layer.bindPopup(feature.properties.LABELNO+'. '+feature.properties.NAMAJALAN);
+  // does this feature have a property named popupContent?
+		if (feature.properties && feature.properties.NAME_4) {
+    layer.bindPopup(feature.properties.NAME_4);
 		}
-		}
+	}
 
 	var ruasKab = L.geoJSON(ruasjalankabbjn, {
 		style: myStyle,
@@ -177,30 +224,11 @@ var streetLabelsRenderer = new L.StreetLabels({
 	//////////////////////// RUAS JALAN ////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////
-	var baseLayers = [
-	{
-		name: "Dark",
-		layer: gldark
-	},
-	{
-		name: "Light",
-		layer: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-	},
-	{
-		name: "Satellite",
-		layer: L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
-		style: 'mapbox://styles/mapbox/satellite-v9'})
-	}
-	];
-	
-   var myIcon = L.Icon.extend({
+	////////////////////////////////////////////////////////////////
+	var myIcon = L.Icon.extend({
 		iconUrl: 'kwh.png',
 		iconSize: [10, 10]});
-		
-	var overLayers = [
-	{
-		name: "APP",
-		layer: L.geoJSON(kwh,{
+	var layerapp = L.geoJSON(kwh,{
             pointToLayer: function (feature, latLng) {
           return new L.Marker(latLng, {
             icon: new myIcon({
@@ -208,16 +236,31 @@ var streetLabelsRenderer = new L.StreetLabels({
 			  iconSize: [20, 20]
             })
           })
-      },
+		},
            onEachFeature: function (feature, layer) {
                    layer.bindPopup(feature.properties.kwh);
            }
-  })
-	}];
+		});
+		
+	
 
-	var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers);
-	map.addControl(panelLayers);
-
+	const baselight = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+	map.addLayer(baselight);
+	const basesatellite = L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
+		style: 'mapbox://styles/mapbox/satellite-v9'});
+		
+	const baseLayers = {
+		'Light': baselight,
+		'Satellite': basesatellite,
+	};
+	
+	const overlays = {
+		'APP': layerapp,
+		'Batas Desa': layerbatasdesa
+	};
+	
+	const layerControl = L.control.layers(baseLayers, overlays).addTo(map);
+	////////////////////////////////////////////////////////////////
 </script>
   </body>
 </html>
