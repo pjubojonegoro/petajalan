@@ -274,10 +274,13 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn, {
 	map.addLayer(baselight);
 	const basesatellite = L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
 		style: 'mapbox://styles/mapbox/satellite-v9'});
+	const baseruasjalan = L.mapboxGL({accessToken: 'pk.eyJ1IjoiZGhhbWFyYXIiLCJhIjoiY2wzbndleGM0MGhlejNjcGV5Z2V0a2E5dyJ9.MgJI6ePjYJ6ihnHL_nOYaA',
+		style: 'mapbox://styles/dhamarar/clocbtfsj016901pfgucqgix6'});
 		
 	const baseLayers = {
 		'Light': baselight,
 		'Satellite': basesatellite,
+		'Ruas Jalan':baseruasjalan
 	};
 	
 	const overlays = {
