@@ -59,6 +59,7 @@
 <script src="data/lampujalankota.js"></script>
 <script src="data/tahun2022.js"></script>
 <script src="data/ruasjalankabbjn.js"></script>
+<script src="data/ruasjalankabbjn2022.js"></script>  
 <script src="data/kwh.js"></script>
 <script src="leaflet-search.js"></script>
 <script src="leaflet-panel-layers.js"></script>
@@ -150,7 +151,7 @@ var layerbataskec = L.geoJSON(bataskec, {
    // }
   },
 });
-var ruasjalanbjn = L.geoJson(ruasjalankabbjn, {
+var ruasjalanbjn = L.geoJson(ruasjalankabbjn2022, {
         onEachFeature: function (feature, layer) {
             layer.setText(feature.properties.NAMAJALAN, 
 			{
@@ -211,7 +212,7 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn, {
 	
 	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
 	var poiLayers = L.layerGroup([
-		L.geoJson(ruasjalankabbjn, geojsonOpts)
+		L.geoJson(ruasjalankabbjn2022, geojsonOpts)
 	])
 	.addTo(map);
 
@@ -239,7 +240,7 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn, {
 		}
 	}
 
-	var ruasKab = L.geoJSON(ruasjalankabbjn, {
+	var ruasKab = L.geoJSON(ruasjalankabbjn2022, {
 		style: myStyle,
 		filter: function (feature, layer) {
 			return true;
