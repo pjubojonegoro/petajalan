@@ -150,7 +150,7 @@ var layerbataskec = L.geoJSON(bataskec, {
    // }
   },
 });
-var ruasjalanbjn = L.geoJson(ruasjalankabbjn2022, {
+var ruasjalankabbjn2022 = L.geoJson(ruasjalankabbjn2022, {
         onEachFeature: function (feature, layer) {
             layer.setText(feature.properties.NAMAJALAN, 
 			{
@@ -211,7 +211,7 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn2022, {
 	
 	//////////////////////// PENCARIAN RUAS JALAN ////////////////////////////////
 	var poiLayers = L.layerGroup([
-		L.geoJson(ruasjalankabbjn, geojsonOpts)
+		L.geoJson(ruasjalankabbjn2022, geojsonOpts)
 	])
 	.addTo(map);
 
@@ -239,7 +239,7 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn2022, {
 		}
 	}
 
-	var ruasKab = L.geoJSON(ruasjalankabbjn, {
+	var ruasKab = L.geoJSON(ruasjalankabbjn2022, {
 		style: myStyle,
 		filter: function (feature, layer) {
 			return true;
