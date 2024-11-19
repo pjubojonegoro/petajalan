@@ -64,6 +64,7 @@
 <script src="leaflet-search.js"></script>
 <script src="leaflet-panel-layers.js"></script>
 <script src="titikbaru.js"></script>
+<script src="wisata.js"></script>
 <script src="leaflet-gps.js"></script>
 
 <script>
@@ -268,6 +269,19 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn2022, {
                    layer.bindPopup(feature.properties.kwh);
            }
 		});
+	var layerwisata = L.geoJSON(wisata,{
+            pointToLayer: function (feature, latLng) {
+          return new L.Marker(latLng, {
+            icon: new myIcon({
+              iconUrl: 'wisata.png',
+			  iconSize: [30, 30]
+            })
+          })
+		},
+           onEachFeature: function (feature, layer) {
+                   layer.bindPopup(feature.properties.DTW);
+           }
+		});
 		
 	
 
@@ -287,6 +301,7 @@ var ruasjalanbjn = L.geoJson(ruasjalankabbjn2022, {
 	
 	const overlays = {
 		'APP': layerapp,
+		'Wisata' : layerwisata,
 		'Batas Desa': layerbatasdesa,
 		'Batas Kecamatan': layerbataskec
 	};
