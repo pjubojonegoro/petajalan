@@ -87,6 +87,15 @@
 	  var markersCanvas = new L.MarkersCanvas();
 
       markersCanvas.addTo(map);
+
+	//////////////////////////////// Click To Google Street View ////////////////////////////////
+	map.on('click',function(e) {
+		let lat = e.latlng.lat.toPrecision(8);
+		let lon = e.latlng.lng.toPrecision(8);
+		const point = L.marker([lat,lon]).addTo(map).on('click',e=> e.target.remove())
+			.bindPopup('<a href="http://maps.google.com/maps?q&layer=c&cbll=' + lat + ',' + lon + '&cbp=11,0,0,0,0" target="_blank"><b> Google Street View</b></a>').openPopup();
+		})
+	//////////////////////////////// Click To Google Street View ////////////////////////////////
 	
 	  //////////////////////////////////////////////////////////////////////////
 	  L.Polygon.include({
